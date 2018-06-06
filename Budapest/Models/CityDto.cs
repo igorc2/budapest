@@ -13,6 +13,13 @@ namespace Budapest.API.Models
 
         public string Description { get; set; }
 
-        public int NumberOfPlacesOfInterest { get; set; }
+        public int NumberOfPlacesOfInterest { get
+            {
+                return PointsOfInterest.Count;
+            }
+        }
+
+        public ICollection<PointOfInterestDto> PointsOfInterest { get; set; }
+            = new List<PointOfInterestDto>();
     }
 }
