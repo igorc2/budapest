@@ -41,6 +41,16 @@ namespace Budapest.API.Controllers
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            if (pointOfIntest.Description == pointOfIntest.Name)
+            {
+                ModelState.AddModelError("Description", "Description should change!");
+            }
+
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
             if(city == null)
