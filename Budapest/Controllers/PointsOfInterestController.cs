@@ -1,5 +1,6 @@
 ﻿using Budapest.API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,31 @@ namespace Budapest.API.Controllers
     [Route("api/cities")]
     public class PointsOfInterestController : Controller
     {
+
+        private ILogger<PointsOfInterestController> _logger;
+
+        public PointsOfInterestController(ILogger<PointsOfInterestController> logger)
+        {
+            logger = _logger;
+        }
+
         [HttpGet("{cityId}/pointsofinterest")]
         public IActionResult GetPointsOfInterest(int cityId, int id)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
-            if (city == null)
-                return NotFound();
-            if (city.PointsOfInterest == null)
-                return NotFound();
-            return Ok(city.PointsOfInterest);
+            try
+            {
+                var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+                if (city == null)
+                    return NotFound();
+                if (city.PointsOfInterest == null)
+                    return NotFound();
+                return Ok(city.PointsOfInterest);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogInformation("This is an error " + ex);
+                return StatusCode(500, "problem");
+            }
         }
 
         [HttpGet("{cityId}/pointsofinterest/{id}", Name = "GetPointOfInterest")]
@@ -26,7 +43,10 @@ namespace Budapest.API.Controllers
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
             if (city == null)
+            {
+                _logger.LogInformation($"City {cityId} not found!");
                 return NotFound();
+            }
             var pointOfInterest = city.PointsOfInterest.FirstOrDefault(p => p.Id == id);
             if (pointOfInterest == null)
                 return NotFound();
