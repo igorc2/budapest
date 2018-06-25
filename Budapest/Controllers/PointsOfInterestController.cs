@@ -1,4 +1,5 @@
 ﻿using Budapest.API.Models;
+using Budapest.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,10 +14,12 @@ namespace Budapest.API.Controllers
     {
 
         private ILogger<PointsOfInterestController> _logger;
+        private IMailService _mailService;
 
-        public PointsOfInterestController(ILogger<PointsOfInterestController> logger)
+        public PointsOfInterestController(ILogger<PointsOfInterestController> logger, IMailService mailService)
         {
-            logger = _logger;
+            _logger = logger;
+            _mailService = mailService;
         }
 
         [HttpGet("{cityId}/pointsofinterest")]
@@ -25,6 +28,7 @@ namespace Budapest.API.Controllers
             try
             {
                 var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+                //throw new Exception("oi");
                 if (city == null)
                     return NotFound();
                 if (city.PointsOfInterest == null)
@@ -149,6 +153,9 @@ namespace Budapest.API.Controllers
             }
 
             city.PointsOfInterest.Remove(pointOfInterestFromStore);
+
+            _mailService.Send("Point of interest deleted",
+                $"Point of interest {pointOfInterestFromStore.Name} was deleted.");
 
             return NoContent();
         }
